@@ -22,7 +22,6 @@
 /workspaces/codespace_mvc/MyMvcApp/obj/Debug/net10.0/scopedcss/Views/Shared/_Layout.cshtml.rz.scp.css
 /workspaces/codespace_mvc/MyMvcApp/obj/Debug/net10.0/scopedcss/bundle/MyMvcApp.styles.css
 /workspaces/codespace_mvc/MyMvcApp/obj/Debug/net10.0/scopedcss/projectbundle/MyMvcApp.bundle.scp.css
-/workspaces/codespace_mvc/MyMvcApp/obj/Debug/net10.0/compressed/mv7rr9borb-{0}-b9sayid5wm-b9sayid5wm.gz
 /workspaces/codespace_mvc/MyMvcApp/obj/Debug/net10.0/compressed/r42dj9v3f5-{0}-61n19gt1b8-61n19gt1b8.gz
 /workspaces/codespace_mvc/MyMvcApp/obj/Debug/net10.0/compressed/5vtmfkbc5c-{0}-xtxxf3hu2r-xtxxf3hu2r.gz
 /workspaces/codespace_mvc/MyMvcApp/obj/Debug/net10.0/compressed/mz1sqfxj73-{0}-bqjiyaj88i-bqjiyaj88i.gz
@@ -223,3 +222,5 @@
 /workspaces/codespace_mvc/MyMvcApp/bin/Debug/net10.0/runtimes/win-x86/native/Microsoft.Data.SqlClient.SNI.dll
 /workspaces/codespace_mvc/MyMvcApp/obj/Debug/net10.0/MyMvcApp.csproj.AssemblyReference.cache
 /workspaces/codespace_mvc/MyMvcApp/obj/Debug/net10.0/MyMvcApp.csproj.Up2Date
+/workspaces/codespace_mvc/MyMvcApp/obj/Debug/net10.0/compressed/ej37zpxvgh-{0}-uk4kuaht5w-uk4kuaht5w.gz
+/workspaces/codespace_mvc/MyMvcApp/obj/Debug/net10.0/compressed/mv7rr9borb-{0}-bwlqh0wcws-bwlqh0wcws.gz

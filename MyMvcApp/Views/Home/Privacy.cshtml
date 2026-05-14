@@ -1,6 +1,49 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+﻿@model IEnumerable<MyMvcApp.Models.Student>
+@{
+    ViewData["Title"] = "Search Students";
+    var query = ViewData["Query"] as string;
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<h1>Search Students</h1>
+
+<form method="get" asp-action="Search" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="q" value="@query" class="form-control" placeholder="Search by name or email..." autofocus />
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
+
+@if (query != null)
+{
+    if (Model.Any())
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Last Name</th>
+                    <th>First Name</th>
+                    <th>Email</th>
+                    <th>Date of Birth</th>
+                    <th>Enrolled</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var student in Model)
+                {
+                    <tr>
+                        <td>@student.LastName</td>
+                        <td>@student.FirstName</td>
+                        <td>@student.Email</td>
+                        <td>@student.DateOfBirth?.ToString("dd MMM yyyy")</td>
+                        <td>@student.EnrolledAt.ToString("dd MMM yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <p class="text-muted">@Model.Count() result(s) found for "@query"</p>
+    }
+    else
+    {
+        <p class="text-muted">No students found matching "@query".</p>
+    }
+}

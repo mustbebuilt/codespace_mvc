@@ -1,0 +1,96 @@
+﻿@model IEnumerable<MyMvcApp.Models.Student>
+@{
+    ViewData["Title"] = "Search Students";
+    var query = ViewData["Query"] as string;
+}
+
+<h1>Search Students</h1>
+
+<form method="get" asp-action="Search" class="search-form">
+    <input type="text" name="q" value="@query" placeholder="Search by name or email..." autofocus />
+    <button type="submit" class="btn">Search</button>
+</form>
+
+@if (query != null)
+{
+    if (Model.Any())
+    {
+        <div class="table-wrap"><table>
+            <thead>
+                <tr>
+                    <th>Last Name</th>
+                    <th>First Name</th>
+                    <th>Email</th>
+                    <th>Date of Birth</th>
+                    <th>Enrolled</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var student in Model)
+                {
+                    <tr>
+                        <td data-label="Last Name">@student.LastName</td>
+                        <td data-label="First Name">@student.FirstName</td>
+                        <td data-label="Email">@student.Email</td>
+                        <td data-label="Date of Birth">@student.DateOfBirth?.ToString("dd MMM yyyy")</td>
+                        <td data-label="Enrolled">@student.EnrolledAt.ToString("dd MMM yyyy")</td>
+                        <td data-label="Actions" class="row-actions">
+                            <a asp-controller="Students" asp-action="Edit" asp-route-id="@student.StudentId" class="btn btn-sm">Edit</a>
+                            <button type="button"
+                                    class="btn btn-sm btn-danger delete-trigger"
+                                    data-student-id="@student.StudentId"
+                                    data-student-name="@($"{student.FirstName} {student.LastName}")">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table></div>
+
+        <dialog id="delete-dialog">
+            <form method="post" asp-controller="Students" asp-action="Delete" id="delete-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="delete-id" />
+                <h2>Delete Student</h2>
+                <p>Are you sure you want to delete <strong id="delete-name"></strong>? This cannot be undone.</p>
+                <div class="dialog-actions">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-delete">Cancel</button>
+                </div>
+            </form>
+        </dialog>
+
+        <p class="text-muted">@Model.Count() result(s) found for "@query"</p>
+    }
+    else
+    {
+        <p class="text-muted">No students found matching "@query".</p>
+    }
+}
+
+@section Scripts {
+<script>
+    (function () {
+        var dialog = document.getElementById('delete-dialog');
+        if (!dialog) return;
+
+        var deleteId = document.getElementById('delete-id');
+        var deleteName = document.getElementById('delete-name');
+        var cancelDelete = document.getElementById('cancel-delete');
+
+        document.querySelectorAll('.delete-trigger').forEach(function (button) {
+            button.addEventListener('click', function () {
+                deleteId.value = button.dataset.studentId;
+                deleteName.textContent = button.dataset.studentName;
+                dialog.showModal();
+            });
+        });
+
+        cancelDelete.addEventListener('click', function () {
+            dialog.close();
+        });
+    })();
+</script>
+}
