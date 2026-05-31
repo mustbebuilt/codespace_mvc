@@ -2,6 +2,8 @@
 
 Welcome to your development environment! This lab uses **GitHub Codespaces**, meaning you do not need to install anything on your local computer. Everything runs directly inside your web browser.
 
+For the current project-specific database runbook (including `sqlcmd` fixes, migration verification, and 40-student seeding), see [dbsetup.md](dbsetup.md).
+
 Follow these step-by-step instructions to launch your workspace, create your .NET MVC application, connect your SQL Server database, and explore data visually.
 
 ---
@@ -120,3 +122,93 @@ When students want to modify structure or view data manually, they can manage it
 
 * **My port forwarded webpage shows an error:** Ensure you ran `dotnet run` inside the `MyMvcApp` folder. If the terminal is frozen, press `Ctrl + C` to cancel it and try again.
 * **The SQL Server connection fails:** Ensure the background containers are fully loaded. You can verify this by checking the **Ports** tab in the bottom panel; port `1433` should have a green checkmark next to it. If it is missing, run a container rebuild as detailed in Step 2.
+
+---
+
+## ✅ Database Quickstart (Current Project)
+
+If you are using the existing app in this repository, this is the shortest reliable path.
+
+### 1) Start SQL Server
+
+```bash
+docker start classroom-sql
+```
+
+If it does not exist yet:
+
+```bash
+docker run -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='ClassroomPassword123!' -p 1433:1433 --name classroom-sql -d mcr.microsoft.com/mssql/server:2022-latest
+```
+
+### 2) Ensure `sqlcmd` is available
+
+If `sqlcmd` is missing, install it once:
+
+```bash
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/24.04/prod noble main" | sudo tee /etc/apt/sources.list.d/microsoft-prod.list >/dev/null
+sudo apt-get update
+sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
+sudo ln -sf /opt/mssql-tools18/bin/sqlcmd /usr/local/bin/sqlcmd
+```
+
+If your current shell still says command not found:
+
+```bash
+source ~/.bashrc
+hash -r
+```
+
+### 3) Run app startup (migrations + seed)
+
+```bash
+cd /workspaces/codespace_mvc/MyMvcApp
+dotnet run
+```
+
+Startup applies migrations and seeds students when the table is empty.
+
+### 4) Verify row count
+
+Use one single-line command:
+
+```bash
+sqlcmd -I -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT COUNT(*) AS TotalStudents FROM ClassroomDB.dbo.Students"
+```
+
+Expected seeded count in this project: **40**.
+
+### 5) Force reseed to 40 (dev reset)
+
+If data already exists and you want to reseed from scratch:
+
+```bash
+cd /workspaces/codespace_mvc/MyMvcApp
+sqlcmd -I -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "DELETE FROM ClassroomDB.dbo.Students"
+ASPNETCORE_URLS="http://127.0.0.1:5299" dotnet run --no-launch-profile
+```
+
+Then verify again:
+
+```bash
+sqlcmd -I -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT COUNT(*) AS TotalStudents FROM ClassroomDB.dbo.Students"
+```
+
+### 6) Common command issues
+
+* **`Invalid object name 'ClassroomDB.dbo.Students'`**
+   Run app startup once so migrations create the table.
+
+* **`DELETE failed ... QUOTED_IDENTIFIER`**
+   Use `sqlcmd -I` (capital i) exactly as shown.
+
+* **Terminal shows `>` and hangs**
+   There is likely an unclosed quote. Press `Ctrl + C` and rerun command as one line.
+
+* **`Address already in use` on `dotnet run`**
+   Use:
+
+   ```bash
+   ASPNETCORE_URLS="http://127.0.0.1:5299" dotnet run --no-launch-profile
+   ```

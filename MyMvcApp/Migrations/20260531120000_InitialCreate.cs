@@ -1,10 +1,14 @@
 using System;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using MyMvcApp.Data;
 
 #nullable disable
 
 namespace MyMvcApp.Migrations;
 
+[DbContext(typeof(ClassroomDbContext))]
+[Migration("20260531120000_InitialCreate")]
 public partial class InitialCreate : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
