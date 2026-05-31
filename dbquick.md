@@ -1,6 +1,6 @@
 ## Quick Start for Codespaces
 
-This repository already contains the MVC app and SQL project. To get the web app working in Codespaces, do these steps in order.
+This repository already contains the MVC app and SQL project. To get the web app working in Codespaces with a database, do these steps in order.
 
 ### 1) Start SQL Server
 
