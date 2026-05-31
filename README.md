@@ -143,7 +143,13 @@ docker run -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='ClassroomPassword123!' -p 1433
 
 ### 2) Ensure `sqlcmd` is available
 
-If `sqlcmd` is missing, install it once:
+Codespaces often starts without `sqlcmd` preinstalled, so check it first:
+
+```bash
+which sqlcmd
+```
+
+If that prints nothing, install it once with:
 
 ```bash
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
@@ -153,12 +159,14 @@ sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
 sudo ln -sf /opt/mssql-tools18/bin/sqlcmd /usr/local/bin/sqlcmd
 ```
 
-If your current shell still says command not found:
+Then refresh the shell path in your current terminal:
 
 ```bash
 source ~/.bashrc
 hash -r
 ```
+
+If you prefer, opening a brand-new terminal also picks up the new path.
 
 ### 3) Run app startup (migrations + seed)
 
@@ -212,3 +220,5 @@ sqlcmd -I -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT CO
    ```bash
    ASPNETCORE_URLS="http://127.0.0.1:5299" dotnet run --no-launch-profile
    ```
+
+

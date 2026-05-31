@@ -12,7 +12,13 @@ dotnet tool install -g dotnet-ef
 
 ### Install sqlcmd (fixes "sqlcmd: command not found")
 
-If `sqlcmd` is already available, skip this section.
+Codespaces often starts without `sqlcmd` preinstalled, so check it first:
+
+```bash
+which sqlcmd
+```
+
+If that prints nothing, install it once with:
 
 ```bash
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
@@ -22,13 +28,22 @@ sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
 sudo ln -sf /opt/mssql-tools18/bin/sqlcmd /usr/local/bin/sqlcmd
 ```
 
+Then refresh the shell path in your current terminal:
+
+```bash
+source ~/.bashrc
+hash -r
+```
+
+If you prefer, opening a brand-new terminal also picks up the new path.
+
 Verify:
 
 ```bash
 sqlcmd -?
 ```
 
-If your current shell still cannot find `sqlcmd`, run:
+If the terminal still cannot find `sqlcmd`, the new shell session may not have loaded yet. Open a fresh terminal or run:
 
 ```bash
 source ~/.bashrc
