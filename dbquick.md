@@ -89,3 +89,12 @@ sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT COUNT
 - The app uses SQL Server, not EF migrations, to create the schema in this setup.
 - If `dotnet run` fails to connect, check that the SQL container is running and that the dacpac publish step completed successfully.
 - If you reseed the database, the sample data script may fail on duplicate rows.
+
+## Glossary
+
+- `docker`: A tool that runs software in isolated containers. In this project, it runs SQL Server in the background.
+- `sqlcmd`: A command-line tool for sending SQL queries and script files to SQL Server.
+- `sqlpackage`: A Microsoft tool that publishes a database package to SQL Server. We use it to deploy the schema from the dacpac.
+- `dacpac`: Short for Data-tier Application Package. It is a file that describes the database schema and can be published to SQL Server. Example in this repo: [ClassroomDB/bin/Debug/ClassroomDB.dacpac](ClassroomDB/bin/Debug/ClassroomDB.dacpac).
+- `SQL Server`: The database engine that stores and manages the ClassroomDB data.
+- `container`: A lightweight runtime started by Docker. Here it holds the SQL Server instance.
