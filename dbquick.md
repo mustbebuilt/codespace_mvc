@@ -1,34 +1,91 @@
-Quick fix when database is not running:
+## Quick Start for Codespaces
 
-1) Start SQL Server container
+This repository already contains the MVC app and SQL project. To get the web app working in Codespaces, do these steps in order.
+
+### 1) Start SQL Server
+
+Run the SQL Server container if it is not already running:
+
+```bash
 docker run -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='ClassroomPassword123!' -p 1433:1433 --name classroom-sql -d mcr.microsoft.com/mssql/server:2022-latest
+```
 
-2) Install sqlpackage if needed
+If the container already exists, start it instead:
+
+```bash
+docker start classroom-sql
+```
+
+### 2) Install the database tools
+
+Install `sqlpackage` once per Codespace if it is missing:
+
+```bash
 dotnet tool install -g microsoft.sqlpackage
+```
 
-3) Install mssql-tools18 if sqlcmd is not found
-curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+Install `sqlcmd` if your terminal says `sqlcmd: command not found`:
+
+```bash
 sudo apt-get update
 sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-
-4) Add sqlcmd to PATH (current session)
 export PATH="$PATH:/opt/mssql-tools18/bin"
+```
 
-   To persist across sessions:
+If you want that PATH change to persist, add this once:
+
+```bash
 echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
+```
 
-5) Deploy database schema from existing dacpac
+### 3) Build the SQL project
+
+From the repository root, build the dacpac:
+
+```bash
+dotnet build /workspaces/codespace_mvc/ClassroomDB/ClassroomDB.sqlproj
+```
+
+### 4) Publish the database
+
+Publish the built dacpac to the local SQL Server instance:
+
+```bash
 sqlpackage /Action:Publish /SourceFile:/workspaces/codespace_mvc/ClassroomDB/bin/Debug/ClassroomDB.dacpac /TargetServerName:"localhost,1433" /TargetDatabaseName:ClassroomDB /TargetUser:sa /TargetPassword:"ClassroomPassword123!" /TargetTrustServerCertificate:True /p:AllowIncompatiblePlatform=true
+```
 
-6) Verify DB is reachable and created
-sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT @@VERSION AS Version, DB_ID('ClassroomDB') AS DbId;"
+### 5) Seed sample data
 
-7) Verify Students table
-sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT name FROM ClassroomDB.sys.tables;"
+Seed the Students table if you want sample rows in the app:
 
-8) Seed Students data from script
-sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -d "ClassroomDB" -i /workspaces/codespace_mvc/ClassroomDB/Scripts/02_data.sql
+```bash
+sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -d "ClassroomDB" -i /workspaces/codespace_mvc/ClassroomDB/Data/Students_Seed.sql
+```
 
-9) Verify seeded row count
-sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT COUNT(*) AS TotalStudents FROM ClassroomDB.dbo.Students"
+### 6) Run the web app
+
+The MVC app already points to the local database in [MyMvcApp/appsettings.json](MyMvcApp/appsettings.json) and wires the connection in [MyMvcApp/Program.cs](MyMvcApp/Program.cs).
+
+Start it from the app folder:
+
+```bash
+cd /workspaces/codespace_mvc/MyMvcApp
+dotnet run
+```
+
+Open the forwarded port that VS Code shows. The app should now be able to read and write `ClassroomDB` through the `DefaultConnection` string.
+
+### 7) Quick checks
+
+Use these commands if you want to confirm the setup:
+
+```bash
+sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT DB_ID('ClassroomDB') AS DbId;"
+sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT COUNT(*) AS TotalStudents FROM ClassroomDB.dbo.Students;"
+```
+
+## Notes
+
+- The app uses SQL Server, not EF migrations, to create the schema in this setup.
+- If `dotnet run` fails to connect, check that the SQL container is running and that the dacpac publish step completed successfully.
+- If you reseed the database, the sample data script may fail on duplicate rows.
