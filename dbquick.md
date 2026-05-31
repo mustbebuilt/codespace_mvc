@@ -1,6 +1,6 @@
 ## Quick Start for Codespaces
 
-This repository already contains the MVC app and SQL project. To get the web app working in Codespaces with a database, do these steps in order.
+This repository uses Entity Framework Core migrations to create and update the database.
 
 ### 1) Start SQL Server
 
@@ -16,66 +16,18 @@ If the container already exists, start it instead:
 docker start classroom-sql
 ```
 
-### 2) Install the database tools
+### 2) Run the MVC app
 
-Install `sqlpackage` once per Codespace if it is missing:
-
-```bash
-dotnet tool install -g microsoft.sqlpackage
-```
-
-Install `sqlcmd` if your terminal says `sqlcmd: command not found`:
-
-```bash
-sudo apt-get update
-sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-export PATH="$PATH:/opt/mssql-tools18/bin"
-```
-
-If you want that PATH change to persist, add this once:
-
-```bash
-echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
-```
-
-### 3) Build the SQL project
-
-From the repository root, build the dacpac:
-
-```bash
-dotnet build /workspaces/codespace_mvc/ClassroomDB/ClassroomDB.sqlproj
-```
-
-### 4) Publish the database
-
-Publish the built dacpac to the local SQL Server instance:
-
-```bash
-sqlpackage /Action:Publish /SourceFile:/workspaces/codespace_mvc/ClassroomDB/bin/Debug/ClassroomDB.dacpac /TargetServerName:"localhost,1433" /TargetDatabaseName:ClassroomDB /TargetUser:sa /TargetPassword:"ClassroomPassword123!" /TargetTrustServerCertificate:True /p:AllowIncompatiblePlatform=true
-```
-
-### 5) Seed sample data
-
-Seed the Students table if you want sample rows in the app:
-
-```bash
-sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -d "ClassroomDB" -i /workspaces/codespace_mvc/ClassroomDB/Data/Students_Seed.sql
-```
-
-### 6) Run the web app
-
-The MVC app already points to the local database in [MyMvcApp/appsettings.json](MyMvcApp/appsettings.json) and wires the connection in [MyMvcApp/Program.cs](MyMvcApp/Program.cs).
-
-Start it from the app folder:
+From the repository root, start the app:
 
 ```bash
 cd /workspaces/codespace_mvc/MyMvcApp
 dotnet run
 ```
 
-Open the forwarded port that VS Code shows. The app should now be able to read and write `ClassroomDB` through the `DefaultConnection` string.
+At startup, the app applies any pending migrations and creates or updates `ClassroomDB`.
 
-### 7) Quick checks
+### 3) Optional checks
 
 Use these commands if you want to confirm the setup:
 
@@ -86,15 +38,15 @@ sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT COUNT
 
 ## Notes
 
-- The app uses SQL Server, not EF migrations, to create the schema in this setup.
-- If `dotnet run` fails to connect, check that the SQL container is running and that the dacpac publish step completed successfully.
-- If you reseed the database, the sample data script may fail on duplicate rows.
+- The app uses EF Core migrations as the source of truth for schema changes.
+- If `dotnet run` fails to connect, check that the SQL container is running and that `DefaultConnection` still points to `localhost,1433`.
+- If you change the model or `ClassroomDbContext`, add a migration before rerunning the app.
 
 ## Glossary
 
 - `docker`: A tool that runs software in isolated containers. In this project, it runs SQL Server in the background.
-- `sqlcmd`: A command-line tool for sending SQL queries and script files to SQL Server.
-- `sqlpackage`: A Microsoft tool that publishes a database package to SQL Server. We use it to deploy the schema from the dacpac.
-- `dacpac`: Short for Data-tier Application Package. It is a file that describes the database schema and can be published to SQL Server. Example in this repo: [ClassroomDB/bin/Debug/ClassroomDB.dacpac](ClassroomDB/bin/Debug/ClassroomDB.dacpac).
+- `EF Core`: Short for Entity Framework Core, the ORM used by the app to map C# classes to database tables.
+- `DbContext`: The EF Core class that represents the database session and exposes entity sets.
+- `migration`: A versioned change to the database schema created from the EF model.
+- `sqlcmd`: A command-line tool for sending SQL queries to SQL Server.
 - `SQL Server`: The database engine that stores and manages the ClassroomDB data.
-- `container`: A lightweight runtime started by Docker. Here it holds the SQL Server instance.

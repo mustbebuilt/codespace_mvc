@@ -2,20 +2,20 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "sqlproj: Build ClassroomDB",
+			"label": "dotnet: build MyMvcApp",
 			"type": "process",
 			"command": "dotnet",
 			"args": [
 				"build",
-				"/workspaces/codespace_mvc/ClassroomDB/ClassroomDB.sqlproj"
+				"/workspaces/codespace_mvc/MyMvcApp/MyMvcApp.csproj"
 			],
-			"problemMatcher": "$sqlproj-problem-matcher",
+			"problemMatcher": "$msCompile",
 			"isBackground": true,
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			},
-			"detail": "Builds the ClassroomDB SQL project"
+			"detail": "Builds the MVC app and EF Core migrations"
 		}
 	]
 }

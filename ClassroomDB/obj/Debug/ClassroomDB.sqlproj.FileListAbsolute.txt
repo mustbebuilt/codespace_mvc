@@ -1,5 +1,0 @@
-/workspaces/codespace_mvc/ClassroomDB/bin/Debug/ClassroomDB.dacpac
-/workspaces/codespace_mvc/ClassroomDB/obj/Debug/Model.xml
-/workspaces/codespace_mvc/ClassroomDB/obj/Debug/refactor.xml
-/workspaces/codespace_mvc/ClassroomDB/obj/Debug/postdeploy.sql
-/workspaces/codespace_mvc/ClassroomDB/obj/Debug/predeploy.sql

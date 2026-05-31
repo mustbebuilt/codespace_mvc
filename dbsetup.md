@@ -1,39 +1,43 @@
 ## ClassroomDB Setup in Codespaces
 
+This repo uses Entity Framework Core migrations from the MVC app instead of a separate SQL project and dacpac deploy.
+
 ### Prerequisites
-Install `sqlpackage` (only needed once per Codespace):
+No separate database deployment tool is required for the normal path. The app uses the connection string in [MyMvcApp/appsettings.json](MyMvcApp/appsettings.json).
+
+If you want to create new migrations later, install the EF CLI once:
+
 ```bash
-dotnet tool install -g microsoft.sqlpackage
+dotnet tool install -g dotnet-ef
 ```
 
 ---
 
-### 1 — Build the SQL project
+### 1 — Start SQL Server
+
 ```bash
-dotnet build /workspaces/codespace_mvc/ClassroomDB/ClassroomDB.sqlproj
+docker run -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='ClassroomPassword123!' -p 1433:1433 --name classroom-sql -d mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-### 2 — Deploy to the local SQL Server
+If the container already exists, start it instead:
+
 ```bash
-sqlpackage \
-  /Action:Publish \
-  /SourceFile:/workspaces/codespace_mvc/ClassroomDB/bin/Debug/ClassroomDB.dacpac \
-  /TargetServerName:"localhost,1433" \
-  /TargetDatabaseName:ClassroomDB \
-  /TargetUser:sa \
-  /TargetPassword:"ClassroomPassword123!" \
-  /TargetTrustServerCertificate:True
+docker start classroom-sql
 ```
 
-### 3 — (Optional) Seed the Students table
+### 2 — Run the MVC app
+
 ```bash
-sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" \
-  -No -i /workspaces/codespace_mvc/ClassroomDB/Data/Students_Seed.sql
+cd /workspaces/codespace_mvc/MyMvcApp
+dotnet run
 ```
 
----
+`Program.cs` applies any pending migrations at startup, so the first run creates or updates the database automatically.
 
-### Verify
+If you change the model, create a migration first and then rerun the app.
+
+### 3 — Verify
+
 ```bash
 sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" \
   -No -Q "SELECT COUNT(*) AS TotalStudents FROM ClassroomDB.dbo.Students"
@@ -42,6 +46,6 @@ sqlcmd -S "localhost,1433" -U sa -P "ClassroomPassword123!" \
 ---
 
 **Notes:**
-- Step 2 is idempotent — re-running it applies any schema changes without dropping data (dacpac diff deploy).
-- Step 3 will fail on re-run due to the unique email constraint — only run it against an empty table.
-- The connection string in appsettings.json already matches these credentials, so the MVC app will connect automatically after step 2.
+- EF Core migrations are now the source of truth for schema changes.
+- If you change `Student.cs` or `ClassroomDbContext.cs`, add a new migration and rerun the app.
+- The old `ClassroomDB` SQL project is no longer part of the normal setup path.
