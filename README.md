@@ -4,7 +4,7 @@ Welcome to your development environment! This lab uses **GitHub Codespaces**, me
 
 For the current project-specific database runbook (including `sqlcmd` fixes, migration verification, and 40-student seeding), see [dbsetup.md](dbsetup.md).
 
-Follow these step-by-step instructions to launch your workspace, create your .NET MVC application, connect your SQL Server database, and explore data visually.
+Follow these step-by-step instructions in the same order used to get this application running in this repository.
 
 ---
 
@@ -28,7 +28,65 @@ Your workspace runs two environments side-by-side: a **.NET application workspac
 
 ---
 
-## 🛠️ Step 3: Create and Configure Your .NET MVC App
+## 🛠️ Step 3: Start SQL Server
+
+To create the Docker container with SQL Server, run:
+
+```bash
+docker run -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='ClassroomPassword123!' -p 1433:1433 --name classroom-sql -d mcr.microsoft.com/mssql/server:2022-latest
+```
+
+---
+
+## 🔧 Step 4: Ensure `sqlcmd` Is Available
+
+Codespaces often starts without `sqlcmd` preinstalled, so check it first:
+
+```bash
+which sqlcmd
+```
+
+If that prints nothing, install it once with:
+
+```bash
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/24.04/prod noble main" | sudo tee /etc/apt/sources.list.d/microsoft-prod.list >/dev/null
+sudo apt-get update
+sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
+sudo ln -sf /opt/mssql-tools18/bin/sqlcmd /usr/local/bin/sqlcmd
+```
+
+Then refresh the shell path in your current terminal:
+
+```bash
+source ~/.bashrc
+hash -r
+```
+
+If you prefer, opening a brand-new terminal also picks up the new path.
+
+---
+
+## 🏃‍♂️ Step 5: Run the Existing Application
+
+Use the existing app in this repository and run startup (migrations + seed):
+
+```bash
+cd /workspaces/codespace_mvc/MyMvcApp
+dotnet run
+```
+
+Startup applies migrations and seeds students when the table is empty.
+
+To verify seeded row count (expected: **40**):
+
+```bash
+sqlcmd -I -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT COUNT(*) AS TotalStudents FROM ClassroomDB.dbo.Students"
+```
+
+---
+
+## 🧪 Optional: Build a Fresh MVC App From Scratch
 
 Let's generate a fresh .NET MVC application and install the required database packages.
 
@@ -64,7 +122,7 @@ Let's generate a fresh .NET MVC application and install the required database pa
 
 ---
 
-## 🏃‍♂️ Step 4: Run Your Application
+## ▶️ Optional: Run Your Fresh App
 
 Let's test the application to ensure the web server boots successfully.
 
@@ -79,131 +137,12 @@ Let's test the application to ensure the web server boots successfully.
 
 ---
 
-## 🗄️ Step 5: Connect to the Built-in SQL Server GUI
-
-You do not need external software like SSMS. We have pre-installed the official Microsoft SQL Server extension into your browser window.
-
-1. On the far-left vertical sidebar of your Codespace, click the **SQL Server Icon** (it looks like a fridge).
-2. In the connection pane that opens, click the **+** icon (**Add Connection**).
-3. Follow the prompts at the very top of your screen to enter these exact configuration settings:
-   * **Server Name:** `localhost`
-   * **Database Name:** Type `ClassroomDB` (or press `Enter` to browse all tables)
-   * **Authentication Type:** Select `SQL Login`
-   * **User Name:** `sa`
-   * **Password:** `ClassroomPassword123!`
-   * **Save Password?** Select `Yes`
-   * **Connection Name:** Type `Classroom Connection` and press `Enter`.
-
-Your database connection will appear in the sidebar. Once you create or migrate tables via Entity Framework, they will show up under this connection.
-
----
-
-## 📝 Step 6: How to Add and View Data Visually
-
-When students want to modify structure or view data manually, they can manage it directly from the GUI sidebar.
-
-### Method A: Writing SQL Queries
-1. Right-click on your connection (`Classroom Connection`) in the sidebar list.
-2. Select **New Query**.
-3. A blank text file will open. Type your SQL code, for example:
-   ```sql
-   SELECT * FROM Students;
-   ```
-4. Right-click anywhere inside the text editor and select **Execute Query** (or press `Ctrl + Shift + E`). The results pane will appear on the right side.
-
-### Method B: Visual Table Designer
-1. Expand your connection, expand **Tables**, right-click any table name, and select **Design Table**.
-2. A visual interface will open where you can add new columns, change data types, and configure constraints.
-3. Click the **Save** icon or press `Ctrl + S` to push your structural changes live to the database.
-
----
-
 ## 🛑 Troubleshooting
 
 * **My port forwarded webpage shows an error:** Ensure you ran `dotnet run` inside the `MyMvcApp` folder. If the terminal is frozen, press `Ctrl + C` to cancel it and try again.
 * **The SQL Server connection fails:** Ensure the background containers are fully loaded. You can verify this by checking the **Ports** tab in the bottom panel; port `1433` should have a green checkmark next to it. If it is missing, run a container rebuild as detailed in Step 2.
 
----
-
-## ✅ Database Quickstart (Current Project)
-
-If you are using the existing app in this repository, this is the shortest reliable path.
-
-### 1) Start SQL Server
-
-```bash
-docker start classroom-sql
-```
-
-If it does not exist yet:
-
-```bash
-docker run -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='ClassroomPassword123!' -p 1433:1433 --name classroom-sql -d mcr.microsoft.com/mssql/server:2022-latest
-```
-
-### 2) Ensure `sqlcmd` is available
-
-Codespaces often starts without `sqlcmd` preinstalled, so check it first:
-
-```bash
-which sqlcmd
-```
-
-If that prints nothing, install it once with:
-
-```bash
-curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/24.04/prod noble main" | sudo tee /etc/apt/sources.list.d/microsoft-prod.list >/dev/null
-sudo apt-get update
-sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-sudo ln -sf /opt/mssql-tools18/bin/sqlcmd /usr/local/bin/sqlcmd
-```
-
-Then refresh the shell path in your current terminal:
-
-```bash
-source ~/.bashrc
-hash -r
-```
-
-If you prefer, opening a brand-new terminal also picks up the new path.
-
-### 3) Run app startup (migrations + seed)
-
-```bash
-cd /workspaces/codespace_mvc/MyMvcApp
-dotnet run
-```
-
-Startup applies migrations and seeds students when the table is empty.
-
-### 4) Verify row count
-
-Use one single-line command:
-
-```bash
-sqlcmd -I -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT COUNT(*) AS TotalStudents FROM ClassroomDB.dbo.Students"
-```
-
-Expected seeded count in this project: **40**.
-
-### 5) Force reseed to 40 (dev reset)
-
-If data already exists and you want to reseed from scratch:
-
-```bash
-cd /workspaces/codespace_mvc/MyMvcApp
-sqlcmd -I -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "DELETE FROM ClassroomDB.dbo.Students"
-ASPNETCORE_URLS="http://127.0.0.1:5299" dotnet run --no-launch-profile
-```
-
-Then verify again:
-
-```bash
-sqlcmd -I -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT COUNT(*) AS TotalStudents FROM ClassroomDB.dbo.Students"
-```
-
-### 6) Common command issues
+## ✅ Common Command Issues
 
 * **`Invalid object name 'ClassroomDB.dbo.Students'`**
    Run app startup once so migrations create the table.
@@ -220,5 +159,24 @@ sqlcmd -I -S "localhost,1433" -U sa -P "ClassroomPassword123!" -No -Q "SELECT CO
    ```bash
    ASPNETCORE_URLS="http://127.0.0.1:5299" dotnet run --no-launch-profile
    ```
+
+---
+
+## 🗄️ Final Optional: SQL Server GUI Guide
+
+Use this only if you want to browse tables and run queries from the VS Code SQL extension UI.
+
+1. On the left sidebar, click the **SQL Server** icon.
+2. In the connection pane, click **+ Add Connection**.
+3. Enter the following settings:
+   * **Server Name:** `localhost`
+   * **Database Name:** `ClassroomDB` (or press Enter to browse all)
+   * **Authentication Type:** `SQL Login`
+   * **User Name:** `sa`
+   * **Password:** `ClassroomPassword123!`
+   * **Save Password:** `Yes`
+   * **Connection Name:** `Classroom Connection`
+
+After connecting, expand **Tables** to inspect data or right-click the connection and choose **New Query**.
 
 
