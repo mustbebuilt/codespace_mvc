@@ -11,30 +11,59 @@ public static class DbSeeder
             return;
         }
 
-        var firstNames = new[]
+        var studentNames = new (string FirstName, string LastName)[]
         {
-            "Ava", "Liam", "Maya", "Noah", "Emma",
-            "Ethan", "Olivia", "Lucas", "Sophia", "Mason"
+            ("Ava", "Thompson"),
+            ("Liam", "Carter"),
+            ("Maya", "Reed"),
+            ("Noah", "Bennett"),
+            ("Emma", "Hayes"),
+            ("Ethan", "Parker"),
+            ("Olivia", "Foster"),
+            ("Lucas", "Bryant"),
+            ("Sophia", "Long"),
+            ("Mason", "Powell"),
+            ("Isla", "Morgan"),
+            ("Elijah", "Bell"),
+            ("Harper", "Ross"),
+            ("Logan", "Gray"),
+            ("Amelia", "Wood"),
+            ("James", "Cook"),
+            ("Charlotte", "Brooks"),
+            ("Benjamin", "Ward"),
+            ("Ella", "Cooper"),
+            ("Henry", "Bailey"),
+            ("Scarlett", "Turner"),
+            ("Daniel", "Morris"),
+            ("Grace", "Murphy"),
+            ("Sebastian", "Cox"),
+            ("Layla", "Richardson"),
+            ("Jack", "Howard"),
+            ("Zoey", "Ward"),
+            ("Owen", "Jenkins"),
+            ("Nora", "Price"),
+            ("Caleb", "Reed"),
+            ("Stella", "Jenkins"),
+            ("Wyatt", "Crawford"),
+            ("Hannah", "Fisher"),
+            ("Luke", "Sullivan"),
+            ("Penelope", "Kim"),
+            ("Julian", "Diaz"),
+            ("Violet", "Stone"),
+            ("Gabriel", "Marshall"),
+            ("Chloe", "Ortiz"),
+            ("Nathan", "Brooks")
         };
 
-        var lastNames = new[]
-        {
-            "Thompson", "Carter", "Reed", "Bennett", "Hayes",
-            "Parker", "Foster", "Bryant", "Long", "Powell"
-        };
-
-        var students = Enumerable.Range(1, 40)
-            .Select(i =>
+        var students = studentNames
+            .Select((name, index) =>
             {
-                var firstName = firstNames[(i - 1) % firstNames.Length];
-                var lastName = lastNames[(i - 1) % lastNames.Length];
-
                 return new Student
                 {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    Email = $"{firstName.ToLowerInvariant()}.{lastName.ToLowerInvariant()}{i}@classroom.local",
-                    DateOfBirth = new DateOnly(1998 + (i % 6), ((i % 12) + 1), ((i % 28) + 1))
+                    FirstName = name.FirstName,
+                    LastName = name.LastName,
+                    Email = $"{name.FirstName.ToLowerInvariant()}.{name.LastName.ToLowerInvariant()}{index + 1}@classroom.local",
+                    DateOfBirth = new DateOnly(1998 + ((index + 1) % 6), (((index + 1) % 12) + 1), (((index + 1) % 28) + 1))
                 };
             })
             .ToList();
